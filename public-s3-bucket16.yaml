@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'S3 Bucket with public read access, no SSL enforcement, and no custom encryption.'
+
+Resources:
+  PublicS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Disables the default "Block all public access" settings
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  # Bucket Policy to allow public read access
+  PublicBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PublicS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: 
+              - 's3:GetObject'
+            Resource: !Sub '${PublicS3Bucket.Arn}/*'
+
+Outputs:
+  BucketName:
+    Description: Name of the created S3 Bucket
+    Value: !Ref PublicS3Bucket
+  BucketDomainName:
+    Description: Domain name of the S3 Bucket
+    Value: !GetAtt PublicS3Bucket.DomainName
